@@ -1,7 +1,5 @@
  /*		
-  * Jordan Stadler
-  * Takes a grayscale image and generates a pixel cloud with depth
-  * values based on the grayscale value.
+  *
   */
  
 
@@ -34,7 +32,7 @@ double angleY = 0.0;
 
 double lx = 0.0, ly = 0.0, lz = 0.0;
 
-double x = 0.0, y = 0.0, z = 20.0;
+double x = -5.0, y = 0.0, z = 5.0;
 
 double deltaAngleX = 0.0;
 double deltaAngleY = 0.0;
@@ -68,8 +66,8 @@ void keyMove (double deltaMove ) {
 	// to demonstrate that the sphere is rotating, otherwise it just 
 	// appears to be a circle
  
-	//GLfloat ambient[4] = { 0.0, 0.0, 0.4, 1.0 };// blue ambient reflection
-	//GLfloat specular[4] = { 1.1, 0.8, 0.1, 1.0 };// green specular reflection
+	GLfloat ambient[4] = { 0.0, 0.0, 0.4, 1.0 };// blue ambient reflection
+	GLfloat specular[4] = { 1.1, 0.8, 0.1, 1.0 };// green specular reflection
 
 	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
@@ -77,16 +75,19 @@ void keyMove (double deltaMove ) {
 	 gluLookAt(x, y, z, x+lx, y+ly, z+lz, 0.0, 1.0, 0.0);
 	
 	glColor3f (1.0f, 1.0f, 1.0f);
-	glBegin(GL_POINTS);
+	//glBegin(GL_POINTS);
 	 printf("image w: %d h: %d\n", image_size.width, image_size.height);
-	 for( int l = 0; l < A.rows; l++ ) {
+	 for( int l = 0; l < A.rows-1; l++ ) {
+		 glBegin(GL_TRIANGLE_STRIP);
 		 for( int m = 0; m < A.cols; m++) {
 			 //printf("dims: %d\n", A.dims);
 			 //printf("element: %d\n", (int)A.at<uchar>(l,m) );
 			 glVertex3f( m*0.01, 1-l*0.01, ((int)A.at<uchar>(l,m)) *0.01 );
+			 glVertex3f( m*0.01, 1-(l+1)*0.01, ((int)A.at<uchar>(l,m)) *0.01 );
 		 }
+		 glEnd();
 	 }
-	 glEnd();
+	 //glEnd();
 
 	 /*
 	glColor3f (1.0f, 1.0f, 1.0f);
@@ -125,14 +126,14 @@ void animate() {
 
 void gfxinit() {
 
-	A = cv::imread("stadler.png", 0);
-
+	//A = cv::imread("stadler.png", 0);
+	A = cv::imread("gradient.png", 0);
 	do{
 		cv::imshow("image", A);
 	}while(cv::waitKey(5) != 'q');
 	
 	image_size = A.size();
-     GLfloat lightpos[4] = { 0.0, 5.0, 0.0, 1.0 };     // light position
+     GLfloat lightpos[4] = { -5.0, 5.0, 0.0, 1.0 };     // light position
 	 GLfloat lightamb[4] = { 0.3, 0.3, 0.3, 1.0 };     // ambient colour
 	 GLfloat lightdif[4] = { 0.8, 0.8, 0.8, 1.0 };     // diffuse colour
 	 GLfloat lightspec[4] = { 0.6, 0.6, 0.6, 1.0 };    // specular colour
@@ -143,7 +144,8 @@ void gfxinit() {
      glMatrixMode(GL_PROJECTION);
      gluPerspective(40.0, 1.0, 1.0, 100.0);
      glMatrixMode(GL_MODELVIEW);
-     gluLookAt(0.0, 0.0, 20.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+	 gluLookAt(x, y, z, x+lx, y+ly, z+lz, 0.0, 1.0, 0.0);
+    // gluLookAt(0.0, 0.0, 20.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
      glShadeModel(GL_SMOOTH);
      // set the light position, 5 units along the y axis
      glLightfv(GL_LIGHT0, GL_POSITION, lightpos);
@@ -257,7 +259,7 @@ int main(int argc, char **argv) {
 	 glutInitWindowSize(1280,960);
      glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 
-     window = glutCreateWindow("Pixel Cloud");
+     window = glutCreateWindow("Picture to Mesh");
 
      glutDisplayFunc(display);
 
